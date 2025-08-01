@@ -448,8 +448,8 @@ def import_issues(issues):
 
 		result_issues.append(result_issue)
 
-		# Add a 5-second delay between issues to avoid rate limiting
-		time.sleep(5)
+		# Add a 10-second delay between issues to avoid rate limiting
+		time.sleep(10)
 
 	state.current = state.IMPORT_COMPLETE
 
