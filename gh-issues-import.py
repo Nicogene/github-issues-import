@@ -228,11 +228,33 @@ def send_request(which, url, post_data=None, method=None):
 
 	return json.loads(json_data.decode("utf-8"))
 
+
+
+def send_request_paginate(which, url):
+	if "?" not in url:
+		url += "?"
+	else:
+		url += "&"
+
+	retval = []
+	page_num = 1
+	should_run = True
+
+	while should_run:
+		current_url = url + ("page=%s" % page_num)
+		current_result = send_request(which, current_url)
+		if current_result:
+			retval.extend(current_result)
+			page_num += 1
+		else:
+			should_run = False
+	return retval
+
 def get_milestones(which):
-	return send_request(which, "milestones?state=open")
+	return send_request_paginate(which, "milestones?state=open")
 
 def get_labels(which):
-	return send_request(which, "labels")
+	return send_request_paginate(which, "labels")
 
 def get_issue_by_id(which, issue_id):
 	return send_request(which, "issues/%d" % issue_id)
@@ -247,19 +269,11 @@ def get_issues_by_id(which, issue_ids):
 
 # Allowed values for state are 'open' and 'closed'
 def get_issues_by_state(which, state):
-	issues = []
-	page = 1
-	while True:
-		new_issues = send_request(which, "issues?state=%s&direction=asc&page=%d" % (state, page))
-		if not new_issues:
-			break
-		issues.extend(new_issues)
-		page += 1
-	return issues
+	return send_request_paginate(which, "issues?state=%s&direction=asc" % state)
 
 def get_comments_on_issue(which, issue):
 	if issue['comments'] != 0:
-		return send_request(which, "issues/%s/comments" % issue['number'])
+		return send_request_paginate(which, "issues/%s/comments" % issue['number'])
 	else :
 		return []
 
